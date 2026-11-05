@@ -85,6 +85,13 @@ sap.ui.define([
                 $.ajax(settings).done(function (response) {
 
                     var dataResponse = response;
+                    dataResponse.forEach(function (item) {
+                        if (item.DELETESTATUS_DESCRIPTION === "ACTIVO") {
+                            item.DELETESTATUS_DESCRIPTION = this.i18n.getText("estadoActivo");
+                        } else if (item.DELETESTATUS_DESCRIPTION === "INACTIVO") {
+                            item.DELETESTATUS_DESCRIPTION = this.i18n.getText("estadoInactivo");
+                        }
+                    }.bind(this));
                     oModel.setProperty("/DATA", dataResponse);
                     oModel.setProperty("/TITULO_TABLA", this.i18n.getText("resultados", [dataResponse.length.toString()]));
                     oModel.refresh();
@@ -812,6 +819,17 @@ sap.ui.define([
                 oTable = this.getView().byId('oTable');
                 oBinding = oTable.getBinding('items').oList;
                 aCols = this.createColumnConfig();
+                aData = oBinding.map(function (item) {
+                    var oItem = Object.assign({}, item);
+
+                    if (oItem.DELETESTATUS_DESCRIPTION === "ACTIVO") {
+                        oItem.DELETESTATUS_DESCRIPTION = this.i18n.getText("estadoActivo");
+                    } else if (oItem.DELETESTATUS_DESCRIPTION === "INACTIVO") {
+                        oItem.DELETESTATUS_DESCRIPTION = this.i18n.getText("estadoInactivo");
+                    }
+
+                    return oItem;
+                }.bind(this));
                 oSettings = {
                     workbook: { columns: aCols },
                     fileName: 'adminfaq.xlsx',
@@ -827,14 +845,14 @@ sap.ui.define([
             },
             createColumnConfig: function () {
 
-                var id = this.i18n.getText("id"),
+                var type = this.i18n.getText("type"),
                     question = this.i18n.getText("question"),
                     answer = this.i18n.getText("answer"),
                     estado = this.i18n.getText("estado");
 
                 return [
                     {
-                        label: id,
+                        label: type,
                         property: 'TYPE',
                         type: EdmType.String,
                         scale: 0
@@ -851,7 +869,7 @@ sap.ui.define([
                     },
                     {
                         label: estado,
-                        property: 'DELETESTATUS',
+                        property: 'DELETESTATUS_DESCRIPTION',
                         type: EdmType.String
                     }
                 ];
